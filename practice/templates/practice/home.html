@@ -1,0 +1,37 @@
+{% extends "practice/base.html" %}
+
+{% block title %}选择测试{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">Math Stake</p>
+    <h1>选择一个测试开始练习</h1>
+    <p class="muted">每个测试会自动出题、开始倒计时，并在交卷后显示正确题数、总题数和百分比。</p>
+</section>
+
+<section class="grid cards">
+    {% for config in test_configs %}
+        <article class="card">
+            <h2>{{ config.name }}</h2>
+            {% if config.description %}
+                <p class="muted">{{ config.description }}</p>
+            {% endif %}
+            <div class="pill-row">
+                <span class="pill">{{ config.question_count }} 道题</span>
+                <span class="pill">{{ config.duration_seconds }} 秒</span>
+                <span class="pill">{{ config.number_count }} 个数字</span>
+                <span class="pill">最大数字 {{ config.max_operand }}</span>
+            </div>
+            <form method="post" action="{% url 'practice:start' config_id=config.pk %}" style="margin-top: 18px;">
+                {% csrf_token %}
+                <button type="submit">开始这个测试</button>
+            </form>
+        </article>
+    {% empty %}
+        <article class="card">
+            <h2>还没有可用测试</h2>
+            <p class="muted">请先在 Django Admin 里创建并启用测试配置。</p>
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}

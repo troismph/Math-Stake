@@ -1,0 +1,49 @@
+{% extends "practice/base.html" %}
+
+{% block title %}测试结果{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">测试结果</p>
+    <h1>{{ attempt.config.name }}</h1>
+    <p class="muted">本次结果已保存，管理员可以在 Django Admin 里查看全部历史记录。</p>
+
+    <section class="stats" style="margin-top: 24px;">
+        <div class="stat">
+            <span class="muted">正确题数</span>
+            <strong>{{ attempt.correct_questions }}</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">总题数</span>
+            <strong>{{ attempt.total_questions }}</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">百分比</span>
+            <strong>{{ attempt.score_percentage }}%</strong>
+        </div>
+        <div class="stat">
+            <span class="muted">用时</span>
+            <strong>{{ attempt.elapsed_seconds }} 秒</strong>
+        </div>
+    </section>
+    <div style="display: flex; justify-content: center; margin-top: 24px;">
+        <a class="button" href="{% url 'practice:home' %}">再做一次</a>
+    </div>
+</section>
+
+<section class="card" style="margin-top: 22px;">
+    <h2>错题列表</h2>
+    {% if incorrect_questions %}
+        <div class="wrong-list">
+            {% for question in incorrect_questions %}
+                <div class="wrong-item">
+                    <strong>{{ question.position }}. {{ question.expression }} = {{ question.correct_answer }}</strong>
+                    <p class="muted" style="margin: 8px 0 0;">你的答案：{{ question.user_answer|default_if_none:"未作答" }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted">这次全部答对了。</p>
+    {% endif %}
+</section>
+{% endblock %}

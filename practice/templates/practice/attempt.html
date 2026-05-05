@@ -1,0 +1,74 @@
+{% extends "practice/base.html" %}
+
+{% block title %}答题中{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">正在作答</p>
+    <h1>{{ attempt.config.name }}</h1>
+    <p class="muted">做完后点击交卷。倒计时结束会自动交卷，未作答的题目会算错。</p>
+</section>
+
+<div class="sticky-bar">
+    <div>
+        <div class="muted" style="color: rgba(255, 250, 240, 0.78);">剩余时间</div>
+        <strong id="countdown">--:--</strong>
+    </div>
+    <div>
+        <a class="button secondary" href="{% url 'practice:home' %}">回到首页</a>
+    </div>
+</div>
+
+<form id="attempt-form" method="post" action="{% url 'practice:submit' attempt_id=attempt.pk %}">
+    {% csrf_token %}
+    <section class="question-list">
+        {% for question in questions %}
+            <label class="question" for="question_{{ question.pk }}">
+                <strong>{{ question.position }}. {{ question.expression }} =</strong>
+                <input id="question_{{ question.pk }}" name="question_{{ question.pk }}" type="number" inputmode="numeric" autocomplete="off">
+            </label>
+        {% endfor %}
+    </section>
+    <div style="display: flex; justify-content: center; margin-top: 24px;">
+        <button type="submit">交卷</button>
+    </div>
+</form>
+
+<script>
+    (() => {
+        const form = document.getElementById("attempt-form");
+        const countdown = document.getElementById("countdown");
+        const inputs = Array.from(form.querySelectorAll("input[type='number']"));
+        let remainingSeconds = {{ remaining_seconds }};
+
+        const render = () => {
+            const minutes = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+            const seconds = String(remainingSeconds % 60).padStart(2, "0");
+            countdown.textContent = `${minutes}:${seconds}`;
+        };
+
+        const lockInputs = () => {
+            inputs.forEach((input) => {
+                input.readOnly = true;
+            });
+        };
+
+        render();
+        if (remainingSeconds <= 0) {
+            lockInputs();
+            form.submit();
+            return;
+        }
+
+        const timer = window.setInterval(() => {
+            remainingSeconds -= 1;
+            render();
+            if (remainingSeconds <= 0) {
+                window.clearInterval(timer);
+                lockInputs();
+                form.submit();
+            }
+        }, 1000);
+    })();
+</script>
+{% endblock %}
